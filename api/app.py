@@ -58,6 +58,13 @@ def detectar_intencion(prompt: str):
 
     return "table", None
 
+# ENDPOINT BIENVENIDA
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({
+        "message": "API de TXT a SQL funcionando correctamente"
+    }), 200
+
 # ENDPOINT DE SALUD
 @app.route("/health", methods=["GET"])
 def health_check():
