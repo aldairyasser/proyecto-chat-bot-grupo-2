@@ -58,6 +58,10 @@ def detectar_intencion(prompt: str):
 
     return "table", None
 
+# ENDPOINT DE SALUD
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "todo en orden grumetes"}), 200
 
 # ENPOINT PRINCIPAL
 @app.route("/query", methods=["POST"])
