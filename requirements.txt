@@ -1,4 +1,12 @@
-spacy
 
-python -m spacy download en_core_web_sm
-python -m spacy download es_core_news_sm
+spacy
+flask
+flask_sqlalchemy
+sqlalchemy
+python-dotenv
+psycopg2-binary
+spacy
+langdetect
+pandas
+gunicorn
+

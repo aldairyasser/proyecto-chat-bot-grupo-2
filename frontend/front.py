@@ -1,29 +1,69 @@
 import streamlit as st
 import requests
-import urllib.parse
+import json
 
-st.title("Consulta SQL con Flask API")
+st.set_page_config(page_title="Test API TXT → SQL", layout="wide")
 
-sql_query = st.text_area("Escribe tu consulta SQL", height=150)
+st.title("🧪 Test API TXT → SQL (JSON)")
 
-if st.button("Ejecutar"):
-    if not sql_query.strip():
-        st.warning("Por favor escribe una consulta SQL.")
+prompt = st.text_area(
+    "Escribe el prompt en lenguaje natural",
+    height=120,
+    placeholder="Ej: grafico de barras de empleados por departamento"
+)
+
+if st.button("Enviar a la API"):
+    if not prompt.strip():
+        st.warning("Por favor escribe un prompt.")
     else:
         try:
             url = "http://localhost:5000/query"
-            params = {"sql": sql_query}
-            encoded_params = urllib.parse.urlencode(params)
-            full_url = f"{url}?{encoded_params}"
-            response = requests.get(full_url)
-            if response.status_code == 200:
+
+            payload = {
+                "prompt": prompt
+            }
+
+            response = requests.post(
+                url,
+                json=payload,
+                timeout=10
+            )
+
+            st.subheader("🔎 Estado HTTP")
+            st.code(response.status_code)
+
+            st.subheader("📦 JSON de respuesta")
+
+            try:
                 data = response.json()
-                results = data.get("results", [])
-                if results:
-                    st.dataframe(results)
+                st.json(data)
+
+                # ===== Comprobaciones básicas =====
+                st.subheader("✅ Validaciones")
+
+                if "type" not in data:
+                    st.error("❌ Falta campo 'type'")
                 else:
-                    st.info("No hay resultados.")
-            else:
-                st.error(f"Error: {response.json().get('error')}")
+                    st.success(f"Tipo detectado: {data['type']}")
+
+                if data.get("type") == "value":
+                    st.success(f"Valor devuelto: {data.get('value')}")
+
+                if data.get("type") in ["table", "chart"]:
+                    cols = data.get("data", {}).get("columns")
+                    rows = data.get("data", {}).get("rows")
+
+                    if cols and rows:
+                        st.success("Tabla base correcta")
+                        st.dataframe(
+                            [dict(zip(cols, r)) for r in rows]
+                        )
+                    else:
+                        st.error("❌ data.columns o data.rows incorrectos")
+
+            except json.JSONDecodeError:
+                st.error("La respuesta no es JSON válido")
+                st.text(response.text)
+
         except Exception as e:
             st.error(f"No se pudo conectar con la API: {e}")
