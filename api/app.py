@@ -49,14 +49,7 @@ def detectar_intencion(prompt: str):
         if "linea" in prompt or "linea" in prompt:
             return "chart", "line"
         return "chart", "bar"
-
-    if any(k in prompt for k in [
-        "valor max", "valor maximo", "valor min", "valor minimo", "numero",
-        "el valor medio", "el valor promedio", "count", "total", "suma"
-    ]):
-        return "value", None
-
-    return "table", None
+    return "data", None
 
 # ENDPOINT BIENVENIDA
 @app.route("/", methods=["GET"])
@@ -107,15 +100,11 @@ def run_query():
                 "columns": columns,
                 "rows": data_rows
             },
-            "value": None,
             "sql": sql,
             "metadata": {
                 "prompt": prompt
             }
         }
-
-        if query_type == "value":
-            response["value"] = data_rows[0][0]
 
         return jsonify(response)
 
