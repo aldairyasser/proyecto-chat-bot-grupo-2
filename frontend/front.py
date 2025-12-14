@@ -50,7 +50,7 @@ if st.button("Enviar a la API"):
                 if data.get("type") == "value":
                     st.success(f"Valor devuelto: {data.get('value')}")
 
-                if data.get("type") in ["table", "chart"]:
+                if data.get("type") in ["data", "chart"]:
                     cols = data.get("data", {}).get("columns")
                     rows = data.get("data", {}).get("rows")
 
