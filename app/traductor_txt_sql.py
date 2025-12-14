@@ -7,7 +7,7 @@ nlp_es = spacy.load("es_core_news_sm") # Español
 nlp_en = spacy.load("en_core_web_sm") # English
 
 # TODAVÍA QUEDA POR HACER EL JOIN
-TABLE_NAME = "desafio_tripulaciones_db"
+TABLE_NAME = "ecommerce"
 
 COLS = {
     "id_cliente","nombre","apellidos","email","pais","ciudad","edad","genero",
@@ -113,13 +113,10 @@ AGG_WORDS = {
     }
 }
 
-# %% [markdown]
 # ## Agrupaciones temporales
-
-# %%
 TIME_GROUP_WORDS = {
     "es": {
-        "quarter": {"trimestre", "trimestral", "trimestralmente", "cuatrimestre"},
+        "quarter": {"trimestre", "trimestral", "trimestralmente"},
         "month": {"mes", "mensual"},
         "year": {"año", "anual"},
     },
@@ -130,10 +127,7 @@ TIME_GROUP_WORDS = {
     }
 }
 
-# %% [markdown]
 # ## Funcion que detecta el idioma
-
-# %%
 def detectar_idioma(texto: str):
     lang = detect(texto)
     if lang == "es":
@@ -143,20 +137,12 @@ def detectar_idioma(texto: str):
     else:
         raise ValueError(f"Idioma no soportado: {lang}")
 
-# %% [markdown]
 # ## Filtro de fecha
-
-# %% [markdown]
 # ### Filtro año
-
-# %%
 def _find_years(texto: str):
     return sorted(set(re.findall(r"\b(2023|2024)\b", texto)))
 
-# %% [markdown]
 # ### SQL año
-
-# %%
 def _year_range_condition_pg(years):
     # years es lista de strings [“2023”] o [“2023",“2024"]
     start_y = min(years)
@@ -165,10 +151,7 @@ def _year_range_condition_pg(years):
         f"fecha_compra BETWEEN '{start_y}-01-01' AND '{end_y}-12-31'"
     )
 
-# %% [markdown]
 # ### Rango meses
-
-# %%
 def _find_month_ranges(texto: str, idioma: str):
     texto = texto.lower()
     pattern = (
@@ -181,10 +164,7 @@ def _find_month_ranges(texto: str, idioma: str):
     )
     return re.findall(pattern, texto)
 
-# %% [markdown]
 # ### SQL rango meses
-
-# %%
 def _month_range_condition_pg(start_month, end_month, year):
     start_date = f"{year}-{start_month:02d}-01"
     # último día del mes final
@@ -194,10 +174,7 @@ def _month_range_condition_pg(start_month, end_month, year):
     )
     return f"fecha_compra BETWEEN '{start_date}' AND {end_date}"
 
-# %% [markdown]
 # ### Filtro un mes en concreto de un año en concreto
-
-# %%
 def _find_single_month(texto: str, idioma: str):
     texto = texto.lower()
     for m, num in MONTHS[idioma].items():
@@ -207,10 +184,7 @@ def _find_single_month(texto: str, idioma: str):
             return num, year
     return None
 
-# %% [markdown]
 # #### SQL un mes en concreto de un año en concreto
-
-# %%
 def _single_month_condition_pg(month, year):
     start = f"{year}-{month:02d}-01"
     end = (
@@ -219,10 +193,7 @@ def _single_month_condition_pg(month, year):
     )
     return f"fecha_compra BETWEEN '{start}' AND {end}"
 
-# %% [markdown]
 # ## Quitar tíldes
-
-# %%
 import unicodedata
 
 def strip_accents(text: str) -> str:
@@ -231,10 +202,7 @@ def strip_accents(text: str) -> str:
         if unicodedata.category(c) != 'Mn'
     )
 
-# %% [markdown]
 # ## Prepocesado minus y mayus
-
-# %%
 def _normalize_tokens(doc):
     # lemmas en minúscula, sin puntuación/espacios
         return [
@@ -243,10 +211,7 @@ def _normalize_tokens(doc):
         if not t.is_punct and not t.is_space
     ]
 
-# %% [markdown]
 # ## Filtro ranking
-
-# %%
 def detectar_ranking(tokens, idioma):
     top_words = {
         "es": {"top", "mejores", "mayores", "ranking"},
@@ -257,20 +222,14 @@ def detectar_ranking(tokens, idioma):
         return True
     return False
 
-# %% [markdown]
 # ## Detectar N top
-
-# %%
 def detectar_limit(texto: str):
     m = re.search(r"\btop\s+(\d+)", texto.lower())
     if m:
         return int(m.group(1))
     return 5  # default razonable
 
-# %% [markdown]
 # ## Filtro agrupaciones
-
-# %%
 def detectar_agregacion(tokens, idioma):
     # default: None (si no pide nada, se puede devolver *)
     for agg, words in AGG_WORDS[idioma].items():
@@ -278,10 +237,7 @@ def detectar_agregacion(tokens, idioma):
             return agg
     return None
 
-# %% [markdown]
 # ## Detección de where
-
-# %%
 def detectar_metricas(tokens, idioma):
     # Busca la primera métrica "razonable"
     # Si menciona ventas/importe -> importe_total; unidades -> cantidad; etc.
@@ -293,10 +249,7 @@ def detectar_metricas(tokens, idioma):
     # fallback: si habla de promedio sin métrica explícita, asumimos ventas
     return None
 
-# %% [markdown]
 # ## Detección de group
-
-# %%
 def detectar_groupbys(tokens, idioma):
     group_cols = []
     # Tiempo
@@ -327,10 +280,7 @@ def detectar_groupbys(tokens, idioma):
             seen.add(g)
     return out
 
-# %% [markdown]
 # ## Detección de filtro
-
-# %%
 def detectar_filtros(doc, tokens, idioma):
     where = []
     text = doc.text.lower()
@@ -410,18 +360,7 @@ def detectar_filtros(doc, tokens, idioma):
             seen.add(w)
     return where_out
 
-# %% [markdown]
 # ## Generador de SQL
-
-# %% [markdown]
-# COUNT(DISTINCT id_transaccion)
-# 
-# o subquery agregada antes del join
-
-# %% [markdown]
-# MODIFICAR COUNT, QUE NO SOLAMENTE SEA CON TRANSACCIONES
-
-# %%
 def generar_sql(texto: str):
     doc, idioma = detectar_idioma(texto)
     tokens = _normalize_tokens(doc)
@@ -499,41 +438,21 @@ def generar_sql(texto: str):
     sql += ";"
     return sql
 
-# %% [markdown]
 # ## Pruebas
-
-# %% [markdown]
-# En la mitad de la query que hada un outer join entre mi tabla cleinte y transacciones
-
-# %% [markdown]
-# SELECT *
-# 
-# FROM transacciones
-# 
-# OUTTER JOIN cliente ON transacciones.id_cliente = cliente.id_cliente;
-
-# %%
 print(generar_sql("¿Cuántas transacciones hubo en 2024?"))
 
-# %%
 print(generar_sql("¿Cuántas transacciones hubo en España en el año 2023?"))
 
-# %%
 print(generar_sql("Ventas máximas por país en enero"))
 
-# %%
 print(generar_sql("Cuántas transacciones en España en 2023 por mes"))
 
-# %%
 print(generar_sql("Total sales in 2024 by country"))
 
-# %%
 print(generar_sql("Muéstrame el promedio de ventas en 2023 por trimestre"))
 
-# %%
 print(generar_sql("Número de transacciones en México en 2024"))
 
-# %%
 print(generar_sql("¿Cuántas transacciones hubo en España en el año 2023?"))
 
 

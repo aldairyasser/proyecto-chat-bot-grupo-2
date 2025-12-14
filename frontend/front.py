@@ -11,11 +11,15 @@ if st.button("Ejecutar"):
         st.warning("Por favor escribe una consulta SQL.")
     else:
         try:
-            url = "http://localhost:5000/query"
-            params = {"sql": sql_query}
-            encoded_params = urllib.parse.urlencode(params)
-            full_url = f"{url}?{encoded_params}"
-            response = requests.get(full_url)
+            #url = "http://localhost:5000/query"
+            #params = {"sql": sql_query}
+            #encoded_params = urllib.parse.urlencode(params)
+            #full_url = f"{url}?{encoded_params}"
+            response = requests.get(
+                "http://127.0.0.1:5000/query",
+                params={"sql": sql_query},
+                timeout=10
+            )
             if response.status_code == 200:
                 data = response.json()
                 results = data.get("results", [])
