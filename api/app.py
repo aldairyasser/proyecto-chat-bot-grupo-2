@@ -5,7 +5,6 @@ from sqlalchemy import text
 from dotenv import load_dotenv
 from .traductor_txt_sql import generar_sql
 
-
 # CARAGAMOS VARIABLES DE ENTORNO
 load_dotenv()
 
