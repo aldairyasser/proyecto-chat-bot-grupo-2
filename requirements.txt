@@ -7,3 +7,4 @@ spacy
 langdetect
 pandas
 gunicorn
+flask-cors
