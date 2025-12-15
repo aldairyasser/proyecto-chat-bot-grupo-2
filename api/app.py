@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from dotenv import load_dotenv
 from .traductor_txt_sql import generar_sql
+from flask_cors import CORS
 
 
 # CARAGAMOS VARIABLES DE ENTORNO
@@ -20,6 +21,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
+# HABILITAR CORS
+CORS(app, supports_credentials=True)
 
 # SEGURIDAD BÁSICA: VALIDAR SQL
 def validar_sql(sql: str):
