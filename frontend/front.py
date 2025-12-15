@@ -9,7 +9,7 @@ st.title("🧪 Test API TXT → SQL (JSON)")
 prompt = st.text_area(
     "Escribe el prompt en lenguaje natural",
     height=120,
-    placeholder="Ej: grafico de barras de empleados por departamento"
+    placeholder="Ej: Ventas totales por país en 2024"
 )
 
 if st.button("Enviar a la API"):
@@ -17,54 +17,47 @@ if st.button("Enviar a la API"):
         st.warning("Por favor escribe un prompt.")
     else:
         try:
-            #url = "http://localhost:5000/query"
+            # Cambia la URL a tu API local o remota
+            # url = "http://localhost:5000/query"
             url = "https://proyecto-chat-bot-grupo-2.onrender.com/query"
 
-            payload = {
-                "prompt": prompt
-            }
+            payload = {"prompt": prompt}
 
-            response = requests.post(
-                url,
-                json=payload,
-                timeout=10
-            )
-
+            response = requests.post(url, json=payload, timeout=10)
             st.subheader("🔎 Estado HTTP")
             st.code(response.status_code)
 
-            st.subheader("📦 JSON de respuesta")
-
             try:
                 data = response.json()
-                st.json(data)
-
-                # ===== Comprobaciones básicas =====
-                st.subheader("✅ Validaciones")
-
-                if "type" not in data:
-                    st.error("❌ Falta campo 'type'")
-                else:
-                    st.success(f"Tipo detectado: {data['type']}")
-
-                if data.get("type") == "value":
-                    st.success(f"Valor devuelto: {data.get('value')}")
-
-                if data.get("type") in ["table", "chart"]:
-                    cols = data.get("data", {}).get("columns")
-                    rows = data.get("data", {}).get("rows")
-
-                    if cols and rows:
-                        st.success("Tabla base correcta")
-                        st.dataframe(
-                            [dict(zip(cols, r)) for r in rows]
-                        )
-                    else:
-                        st.error("❌ data.columns o data.rows incorrectos")
-
             except json.JSONDecodeError:
                 st.error("La respuesta no es JSON válido")
                 st.text(response.text)
+                st.stop()
 
-        except Exception as e:
+            st.subheader("📦 JSON de respuesta (raw)")
+            st.json(data)
+
+            # === Procesamos el resultado real ===
+            result = data.get("result")
+            if not result:
+                st.error("❌ La respuesta no contiene 'result'")
+            else:
+                if result.get("status") == "ok":
+                    rows = result.get("results", [])
+                    if rows:
+                        st.success(f"✅ {len(rows)} resultados encontrados")
+                        st.dataframe(rows)  # muestra tabla
+                    else:
+                        st.warning("⚠️ No se encontraron resultados")
+                else:
+                    st.error(f"❌ Error en la consulta: {result.get('error')}")
+
+            # === Opcional: mostrar SQL generado para debug ===
+            if "sql_debug" in result:
+                st.subheader("📝 SQL generado")
+                st.code(result["sql_debug"])
+
+        except requests.exceptions.RequestException as e:
             st.error(f"No se pudo conectar con la API: {e}")
+        except Exception as e:
+            st.error(f"Error inesperado: {e}")

@@ -31,10 +31,13 @@ def query():
     data = request.get_json()
     prompt = data.get("prompt")
 
-    if not prompt:
-        return jsonify({"error": "Falta 'prompt'"}), 400
+    if not prompt or not isinstance(prompt, str):
+        return jsonify({"error": "Prompt inválido"}), 400
 
-    llm_output = llm_to_mcp(prompt)
+    try:
+        llm_output = llm_to_mcp(prompt)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500   # Evita que si no detecta bien el idioma, lance un error en vez de romperse.
     result = mcp.run(llm_output)
 
     return jsonify({
