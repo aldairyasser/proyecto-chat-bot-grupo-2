@@ -59,8 +59,11 @@ def health_check():
 @app.route("/query", methods=["POST"])
 def run_query():
     data = request.get_json(silent=True)
+
     if not data or "prompt" not in data:
-        return jsonify({"error": "Se requiere un JSON con el campo 'prompt'"}), 400
+        return jsonify({
+            "error": "Se requiere un JSON con el campo 'prompt'"
+        }), 400
 
     prompt = data["prompt"].strip()
     if not prompt:
@@ -69,32 +72,50 @@ def run_query():
     query_type, chart_type = detectar_intencion(prompt)
 
     try:
-        llm_output = generar_sql(prompt)
+        # Generar SQL desde lenguaje natural
+        sql = generar_sql(prompt)
+
+        # Envolver la salida para el MCP
+        llm_output = {
+            "tool": "query_dataset",
+            "params": {
+                "sql": sql
+            }
+        }
+
+        # Ejecutar vía MCP (único punto de acceso a la BD)
         mcp_result = mcp.run(llm_output)
 
         if mcp_result.get("status") != "ok":
             return jsonify(mcp_result), 400
 
-        rows = mcp_result["results"]
+        rows = mcp_result.get("results", [])
         if not rows:
             return jsonify({"error": "Consulta sin resultados"}), 404
 
         columns = list(rows[0].keys())
         data_rows = [list(row.values()) for row in rows]
 
-        return jsonify({
+        # Respuesta unificada
+        response = {
             "type": query_type,
             "chart_type": chart_type,
             "data": {
                 "columns": columns,
                 "rows": data_rows
             },
-            "metadata": {"prompt": prompt}
-        })
+            "sql": sql,
+            "metadata": {
+                "prompt": prompt
+            }
+        }
+
+        return jsonify(response), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
+        return jsonify({
+            "error": str(e)
+        }), 400
 
 # ======================
 # Main
