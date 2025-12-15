@@ -84,7 +84,7 @@ def run_query():
         }
 
         # Ejecutar vía MCP (único punto de acceso a la BD)
-        mcp_result = mcp.run(llm_output)
+        mcp_result = mcp.query_dataset(llm_output)
 
         if mcp_result.get("status") != "ok":
             return jsonify(mcp_result), 400
