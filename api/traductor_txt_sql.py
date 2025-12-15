@@ -555,7 +555,7 @@ def detectar_filtros(doc, tokens, idioma):
             where.append(f"categoria_producto = '{cat_real}'")
         else:
             where.append(
-                f"categoria_producto LIKE '%{val.replace('\'','\'\'')}%'"
+                where.append("producto LIKE '%" + val.replace("'", "''") + "%'")
             )
 
     m_cat = re.search(r"(categor[ií]a)\s+([a-z0-9_\-áéíóúñ ]{2,})", text)
@@ -570,7 +570,8 @@ def detectar_filtros(doc, tokens, idioma):
             where.append(f"categoria_producto = '{cat_real}'")
         else:
             where.append(
-                f"categoria_producto LIKE '%{val.replace('\'','\'\'')}%'"
+                where.append("categoria producto LIKE '%" + val.replace("'", "''") + "%'")
+
             )
 
     # Género
