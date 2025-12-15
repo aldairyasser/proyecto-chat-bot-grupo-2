@@ -1,25 +1,19 @@
-class MCP:
-    def __init__(self, tools: dict):
-        if not isinstance(tools, dict) or not tools:
-            raise ValueError("MCP requiere un diccionario de herramientas válido")
-
-        self.tools = tools
-
-    def run(self, llm_output: dict):              
-        if not isinstance(llm_output, dict):
-            raise ValueError("La salida del LLM debe ser un diccionario")
-
-        tool = llm_output.get("tool")
-        params = llm_output.get("params", {})
-
-        if not tool:
-            raise ValueError("No se especificó ninguna herramienta")
-
-        if tool not in self.tools:
-            raise ValueError(f"Herramienta no permitida: {tool}")
-
-        if not isinstance(params, dict):
-            raise ValueError("Los parámetros de la herramienta deben ser un diccionario")
-
-        # Ejecuta la tool de forma segura
-        return self.tools[tool](**params)
+from sqlalchemy import text
+from flask_sqlalchemy import SQLAlchemy
+# db se inyecta desde la API
+db = None
+def init_db(database):
+    global db
+    db = database
+FORBIDDEN = {"drop", "delete", "update", "insert"}
+def query_dataset(sql: str):
+    if any(word in sql.lower() for word in FORBIDDEN):
+        return {"error": "Consulta no permitida"}
+    if db is None:
+        return {"status": "error", "message": "DB no inicializada"}
+    try:
+        result = db.session.execute(text(sql))
+        rows = [dict(row._mapping) for row in result]
+        return {"status": "ok", "results": rows}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
