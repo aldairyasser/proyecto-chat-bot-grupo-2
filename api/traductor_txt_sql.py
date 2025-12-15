@@ -6,10 +6,10 @@ import pandas as pd
 nlp_es = spacy.load("es_core_news_sm") # Español
 nlp_en = spacy.load("en_core_web_sm") # English
 
-clientes = pd.read_csv("../data/clientes_ecommerce.csv")
-transacciones = pd.read_csv("../data/transacciones_ecommerce.csv")
+#clientes = pd.read_csv("../data/clientes_ecommerce.csv")
+#transacciones = pd.read_csv("../data/transacciones_ecommerce.csv")
 
-df = pd.merge(transacciones, clientes, on="id_cliente", how="outer")
+#df = pd.merge(transacciones, clientes, on="id_cliente", how="outer")
 TABLE_NAME = "merge_transaccion_cliente"
 # IMPORTANTE: en tu df mergeado las columnas son las del CSV, aquí asumo que usas las españolas.
 
