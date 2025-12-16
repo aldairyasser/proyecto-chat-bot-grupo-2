@@ -23,60 +23,207 @@ COLS = {
 # Sinónimos / palabras clave -> columnas (ES/EN)
 SYN_TO_COL = {
     "es": {
-        # métricas
+        # importe total Ventas / Dinero
         "ventas": "importe_total",
+        "dinero": "importe_total",
         "ingresos": "importe_total",
         "beneficios": "importe_total",
+        "ganancias": "importe_total",   
         "facturacion": "importe_total",
         "importe": "importe_total",
         "total": "importe_total",
+        "monto": "importe_total",      
+        "recaudacion": "importe_total", 
+        "caja": "importe_total",        
+        "pasta": "importe_total",       
+        "plata": "importe_total",      
+        "valor": "importe_total",
+        #cantidad / unidades
         "unidades": "cantidad",
         "cantidad": "cantidad",
+        "numero": "cantidad",           
+        "volumen": "cantidad",          
+        "cuantos": "cantidad",          
+        "cuantas": "cantidad",
+        #precio
         "precio": "precio_unitario",
+        "coste": "precio_unitario",     
+        "valor_unitario": "precio_unitario",
+        "pvp": "precio_unitario",
+      # Costes específicos
         "envio": "coste_envio",
+        "transporte": "coste_envio",
+        "portes": "coste_envio",
+        "logistica": "coste_envio",
+        "entregas": "coste_envio",
         "fabricacion": "coste_fabricacion",
-        # dimensiones
-        "pai": "pais",
-        "país": "pais",
+        "produccion": "coste_fabricacion",
+        "elaboracion": "coste_fabricacion",
+        # Ubicación (pais / ciudad)
+        "pais": "pais",
+        "nacion": "pais",
+        "region": "pais",    
+        "territorio": "pais",
         "ciudad": "ciudad",
+        "capital": "ciudad",
+        "municipio": "ciudad",
+        "ubicacion": "ciudad",   
+        "localidad": "ciudad",
+        # Producto y Categoría
         "producto": "producto",
+        "articulo": "producto",
+        "item": "producto",
+        "modelo": "producto",
+        "referencia": "producto",
         "categoria": "categoria_producto",
+        "tipo": "categoria_producto",
+        "clase": "categoria_producto",
+        "familia": "categoria_producto", 
+        "seccion": "categoria_producto", 
+        "gama": "categoria_producto",
+        # Cliente (Personas)
+        "cliente": "id_cliente",
+        "comprador": "id_cliente",
+        "usuario": "id_cliente",
+        "consumidor": "id_cliente",
+        "persona": "id_cliente",
+        "clientes": "id_cliente",
+        # Demografía
         "genero": "genero",
+        "sexo": "genero",
+        "hombres": "genero",           
+        "mujeres": "genero",
         "edad": "edad",
-        "metodo": "metodo_pago",
-        "pago": "metodo_pago",
-        "fecha": "fecha_compra",
-        "compra": "fecha_compra",
+        "anos": "edad",               
+        "nacimiento": "edad",          
+        "viejo": "edad",              
+        "joven": "edad",
+        # Transacción y Fechas
         "transaccion": "id_transaccion",
         "pedido": "id_transaccion",
-        "cliente": "id_cliente",
+        "orden": "id_transaccion",
+        "ticket": "id_transaccion",
+        "factura": "id_transaccion",
+        "operacion": "id_transaccion",
+        "venta": "id_transaccion",
+        "metodo": "metodo_pago",
+        "pago": "metodo_pago",
+        "forma": "metodo_pago",        
+        "tarjeta": "metodo_pago",     
+        "efectivo": "metodo_pago",
+        "fecha": "fecha_compra",
+        "compra": "fecha_compra",
+        "dia": "fecha_compra",
+        "cuando": "fecha_compra",      
+        "momento": "fecha_compra"
     },
     "en": {
         # si el usuario pregunta en inglés, seguimos generando SQL con columnas ES
         # (porque tu dataset está en ES). Solo traducimos la intención.
+   # Sales / Money -> importe_total
         "sales": "importe_total",
         "revenue": "importe_total",
+        "income": "importe_total",
+        "earnings": "importe_total",
+        "profit": "importe_total",      # "Beneficio"
+        "turnover": "importe_total",    # Término muy usado en Europa para facturación
         "amount": "importe_total",
         "total": "importe_total",
+        "money": "importe_total",
+        "value": "importe_total",       # "Total value"
+        "billings": "importe_total",
+
+        # Quantity -> cantidad
         "units": "cantidad",
         "quantity": "cantidad",
+        "volume": "cantidad",           # "Sales volume"
+        "count": "cantidad",
+        "number": "cantidad",           # "Number of items"
+        "items": "cantidad",            # "How many items"
+
+        # Price -> precio_unitario
         "price": "precio_unitario",
+        "cost": "precio_unitario",      # El usuario suele decir "cost" aunque sea precio
+        "unit": "precio_unitario",      # "Unit price"
+        "rate": "precio_unitario",
+        "worth": "precio_unitario",     # "How much is it worth?"
+
+        # Costs
         "shipping": "coste_envio",
+        "delivery": "coste_envio",
+        "transport": "coste_envio",
+        "freight": "coste_envio",
+        "logistics": "coste_envio",
+        
         "manufacturing": "coste_fabricacion",
-        # dimensiones
+        "production": "coste_fabricacion",
+        "making": "coste_fabricacion",  # "Making cost"
+
+        # ====================
+        # 2. DIMENSIONS
+        # ====================
+        # Location -> pais / ciudad
         "country": "pais",
+        "nation": "pais",
+        "region": "pais",
+        "territory": "pais",
+        "land": "pais",
+        
         "city": "ciudad",
+        "town": "ciudad",
+        "location": "ciudad",
+        "municipality": "ciudad",
+        "village": "ciudad",
+
+        # Product
         "product": "producto",
+        "item": "producto",
+        "article": "producto",
+        "model": "producto",
+        "sku": "producto",
+        "good": "producto",             # "Goods sold"
+        
         "category": "categoria_producto",
+        "type": "categoria_producto",
+        "class": "categoria_producto",
+        "family": "categoria_producto",
+        "kind": "categoria_producto",   # "What kind of product"
+        "group": "categoria_producto",
+
+        # Demographics
         "gender": "genero",
+        "sex": "genero",
+        "male": "genero",
+        "female": "genero",
+        
         "age": "edad",
+        "years": "edad",                # "20 years old"
+        "old": "edad",                  # "How old"
+
+        # Transaction details
         "payment": "metodo_pago",
+        "method": "metodo_pago",
+        "card": "metodo_pago",         
+        "cash": "metodo_pago",
+        
         "date": "fecha_compra",
         "purchase": "fecha_compra",
+        "time": "fecha_compra",
+        "when": "fecha_compra",
+        "day": "fecha_compra",
+
+        # IDs
         "transaction": "id_transaccion",
         "order": "id_transaccion",
+        "deal": "id_transaccion",
+        "invoice": "id_transaccion",
+        "ticket": "id_transaccion",
+        
         "client": "id_cliente",
         "customer": "id_cliente",
+        "user": "id_cliente",
+        "buyer": "id_cliente",
+        "shopper": "id_cliente"
     }
 }
 
