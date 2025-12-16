@@ -8,7 +8,7 @@ from sqlalchemy import text
 from dotenv import load_dotenv
 from api.traductor_txt_sql import generar_sql
 from flask_cors import CORS
-from MCP.mcp_core import MCP, init_db
+from MCP.mcp_core import MCP
 import socket
 import json
 
@@ -46,7 +46,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 # INICIALIZAR MCP
-init_db(db)  # inyecta la base en las tools MCP
 mcp = MCP()
 
 # HABILITAR CORS
