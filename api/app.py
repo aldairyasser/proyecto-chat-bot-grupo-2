@@ -47,7 +47,7 @@ db = SQLAlchemy(app)
 
 # INICIALIZAR MCP
 init_db(db)  # inyecta la base en las tools MCP
-mcp = MCP(tools={"query_dataset": query_dataset})
+mcp = MCP()
 
 # HABILITAR CORS
 CORS(app, supports_credentials=True)
@@ -89,38 +89,56 @@ def run_query():
     if not prompt:
         send_to_qradar("WARN", "Prompt vacío en request")
         return jsonify({"error": "El prompt está vacío"}), 400
+
     send_to_qradar("INFO", "Query received", {"prompt": prompt})
-    
+
+    # =========================
+    # MCP – VALIDACIÓN PROMPT
+    # =========================
+    prompt_check = mcp.run_prompt_check(prompt)
+    if prompt_check.get("error"):
+        send_to_qradar(
+            "WARN",
+            "MCP prompt check failed",
+            {"prompt": prompt, "reason": prompt_check["error"]}
+        )
+        return jsonify(prompt_check), 400
+
     query_type, chart_type = detectar_intencion(prompt)
-    
+
     try:
         # Generar SQL desde lenguaje natural
         sql = generar_sql(prompt)
         send_to_qradar("INFO", "SQL generated", {"sql": sql})
-        
-        # Envolver la salida para el MCP
-        llm_output = {
-            "tool": "query_dataset",
-            "params": {
-                "sql": sql
-            }
-        }
 
-        # Ejecutar vía MCP (único punto de acceso a la BD)
-        mcp_result = mcp.run(llm_output)
-        if mcp_result.get("status") != "ok":
-            send_to_qradar("ERROR", "MCP run failed", {"mcp_result": mcp_result})
-            return jsonify(mcp_result), 400
-        
-        rows = mcp_result.get("results", [])
+        # =========================
+        # MCP – VALIDACIÓN SQL
+        # =========================
+        sql_check = mcp.run_sql_check(sql)
+        if sql_check.get("error"):
+            send_to_qradar(
+                "ERROR",
+                "MCP SQL check failed",
+                {"sql": sql, "reason": sql_check["error"]}
+            )
+            return jsonify(sql_check), 400
+
+        # =========================
+        # EJECUCIÓN DIRECTA BBDD
+        # =========================
+        result = db.session.execute(text(sql))
+        rows = result.mappings().all()
+
         if not rows:
             send_to_qradar("INFO", "Query returned no results", {"sql": sql})
             return jsonify({"error": "Consulta sin resultados"}), 404
-        
+
         columns = list(rows[0].keys())
         data_rows = [list(row.values()) for row in rows]
 
-        # Respuesta unificada
+        # =========================
+        # RESPUESTA
+        # =========================
         response = {
             "type": query_type,
             "chart_type": chart_type,
@@ -133,11 +151,14 @@ def run_query():
                 "prompt": prompt
             }
         }
+
         send_to_qradar("INFO", "Query executed successfully", {"rows": len(rows)})
         return jsonify(response), 200
+
     except Exception as e:
         send_to_qradar("ERROR", "Query execution failed", {"error": str(e)})
         return jsonify({"error": str(e)}), 400
+
 # ======================
 # MAIN
 # ======================

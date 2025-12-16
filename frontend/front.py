@@ -17,8 +17,8 @@ if st.button("Enviar a la API"):
         st.warning("Por favor escribe un prompt.")
     else:
         try:
-            #url = "http://localhost:5000/query"
-            url = "https://proyecto-chat-bot-grupo-2.onrender.com/query"
+            url = "http://localhost:5000/query"
+            #url = "https://proyecto-chat-bot-grupo-2-final.onrender.com/query"
 
             payload = {
                 "prompt": prompt
