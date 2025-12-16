@@ -21,6 +21,7 @@ if not DATABASE_URL:
 QRADAR_HOST = os.getenv("QRADAR_HOST", "127.0.0.1")  # IP del HOST con VirtualBox
 QRADAR_PORT = int(os.getenv("QRADAR_PORT", 1514))       # Host Port que apunta al 514 UDP de QRadar
 
+
 # FUNCION SYSLOG PARA QRADAR
 syslog_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 def send_to_qradar(level, message, extra=None):

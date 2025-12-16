@@ -8,6 +8,12 @@ import pandas as pd
 # ## Cargamos los modelos 
 # Modelos
 nlp_es = spacy.load("es_core_news_sm") # Español
+nlp_en = spacy.load("en_core_web_sm") # English
+
+# ## Creamos la base de datos
+# Cargar los CSVs (ajusta las rutas a tus archivos locales)
+#clientes = pd.read_csv("../data/clientes_ecommerce.csv")
+#transacciones = pd.read_csv("../data/transacciones_ecommerce.csv")
 
 #df = pd.merge(transacciones, clientes, on="id_cliente", how="outer")
 TABLE_NAME = "merge_transaccion_cliente"
@@ -1046,6 +1052,7 @@ def generar_sql(texto: str):
     having_range = detectar_having_rango(texto)
     having_cond = detectar_having(texto)
     having = []
+    post_filter = None
 
     has_age_filter = any(w.startswith("edad ") for w in where)  # ya lo tienes arriba, reutilízalo si quieres
     if has_age_filter:
@@ -1081,7 +1088,10 @@ def generar_sql(texto: str):
         operador, valor = having_cond
         expr = agg_expr_sql(agg, metric)
         if expr:
-            having.append(f"{expr} {operador} {valor}")
+            if group_by:
+                having.append(f"{expr} {operador} {valor}")
+            else:
+                post_filter = (operador, valor)
     
     # SELECT
     alias_metric = None
@@ -1144,6 +1154,11 @@ def generar_sql(texto: str):
                 limit = 5
                 
         sql += f" LIMIT {limit or 1}"
-            
+
+    if post_filter:
+        operador, valor = post_filter
+        # aquí alias_metric YA existe porque ya construiste el SELECT
+        sql = f"SELECT * FROM ({sql}) t WHERE {alias_metric} {operador} {valor}"
+
     sql += ";"
     return sql

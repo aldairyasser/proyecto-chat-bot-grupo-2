@@ -21,7 +21,8 @@ class MCP:
         "village","product","item","article","model","sku","good","","category","type","class","family",
         "kind","group","gender","sex","male","female","","age","years","old","payment","method","card",
         "cash","date","purchase","time","when","day","transaction","order","deal","invoice","ticket",
-        "client","customer","user","buyer","shopper"
+        "client","customer","user","buyer","shopper", "productos", "vendidos", "compras", "consumidores",
+        "clientes","hombres","mujeres","edad","años","nacimiento","joven","viejo", "mujer", "hombre", "persona"
         }
 
         self.blocked_topics = {
@@ -49,7 +50,7 @@ class MCP:
             for b in self.blocked_topics
         )
 
-        if has_blocked and not has_business:
+        if has_blocked:
             return {"error": "Prompt fuera del dominio de negocio"}
 
         if not has_business:
