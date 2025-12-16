@@ -8,8 +8,7 @@ from sqlalchemy import text
 from dotenv import load_dotenv
 from api.traductor_txt_sql import generar_sql
 from flask_cors import CORS
-from MCP.mcp_core import MCP
-from MCP.mcp_tools import query_dataset, init_db
+from MCP.mcp_core import MCP, init_db
 import socket
 import json
 
