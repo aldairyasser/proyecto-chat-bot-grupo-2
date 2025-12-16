@@ -10,6 +10,7 @@ import pandas as pd
 nlp_es = spacy.load("es_core_news_sm") # Español
 nlp_en = spacy.load("en_core_web_sm") # English
 
+#df = pd.merge(transacciones, clientes, on="id_cliente", how="outer")
 TABLE_NAME = "merge_transaccion_cliente"
 # IMPORTANTE: en tu df mergeado las columnas son las del CSV, aquí asumo que usas las españolas.
 
@@ -295,6 +296,8 @@ AGG_WORDS = {
         "median": {"mediana", "percentil", "percentil 50","valor central"},
         "mode": {"moda", "mas frecuente", "frecuente","habitual", "tendencia"},
         "std": {"desviacion", "desviacion estandar", "variacion", "volatilidad", "dispersion",},
+        "var": {"varianza", "variance", "var", "variacion", "variabilidad"},
+
     },
     "en": {
         "avg": {"average", "avg", "mean"},
@@ -304,10 +307,11 @@ AGG_WORDS = {
         "min": {"min", "minimum", "lowest"},
         "median": {"median", "percentile"},
         "mode": {"mode", "most frequent"},
-        "std": {"std", "stddev", "standard deviation"}
+        "std": {"std", "stddev", "standard deviation"},
+        "var": {"variance", "var", "variability"},
+
     }
 }
-
 # ## Agrupaciones temporales
 TIME_GROUP_WORDS = {
     "es": {
@@ -771,6 +775,8 @@ def agg_expr_sql(agg: str, metric: str) -> str:
         return f"MIN({metric})"
     if agg == "std":
         return f"STDDEV_POP({metric})"
+    if agg == "var":
+        return f"VAR_POP({metric})"
     if agg == "median":
         return f"PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY {metric})"
     if agg == "mode":
@@ -877,7 +883,7 @@ def detectar_filtros(doc, tokens, idioma):
                 pais_real = PAIS_MAP.get(ent_text_norm, ent.text)
                 where.append(f"pais = '{pais_real}'")
 
-    # Producto / categoría
+    # Producto
     m_prod = re.search(r"(producto)\s+([a-z0-9_\-áéíóúñ ]{2,})", text)
     if m_prod:
         val = m_prod.group(2).strip()
@@ -889,10 +895,8 @@ def detectar_filtros(doc, tokens, idioma):
             if cat_real:
                 where.append(f"categoria_producto = '{cat_real}'")
             else:
-                where.append(
-                    f"categoria_producto LIKE '%{val.replace('\'','\'\'')}%'"
-                )
-    # 
+                where.append("producto LIKE '%" + val.replace("'", "''") + "%'")
+    # Categoría
     m_cat = re.search(r"(categor[ií]a)\s+([a-z0-9_\-áéíóúñ ]{2,})", text)
     if m_cat:
         val = m_cat.group(2).strip()
@@ -904,9 +908,7 @@ def detectar_filtros(doc, tokens, idioma):
             if cat_real:
                 where.append(f"categoria_producto = '{cat_real}'")
             else:
-                where.append(
-                    f"categoria_producto LIKE '%{val.replace('\'','\'\'')}%'"
-                )
+                where.append("categoria producto LIKE '%" + val.replace("'", "''") + "%'")
 
     # Género
     if re.search(r"\b(masculino|macho?s|varon?es|hombre|hombres|male|m)\b", text):
@@ -1087,6 +1089,8 @@ def generar_sql(texto: str):
     select_parts = []
     if group_by:
         select_parts.extend(group_by)
+    if agg == "var" and metric not in {"importe_total", "cantidad", "precio_unitario", "coste_envio", "coste_fabricacion"}:
+        metric = "importe_total"
     if agg == "avg":
         alias_metric = f"promedio_{metric}"
         select_parts.append(f"AVG({metric}) AS {alias_metric}")
@@ -1108,6 +1112,9 @@ def generar_sql(texto: str):
     elif agg == "std":
         alias_metric = f"std_{metric}"
         select_parts.append(f"STDDEV_POP({metric}) AS {alias_metric}")
+    elif agg == "var":
+        alias_metric = f"var_{metric}"
+        select_parts.append(f"VAR_POP({metric}) AS {alias_metric}")
     elif agg == "count":
         # Si pide conteo, contamos transacciones por defecto
         alias_metric = "conteo_clientes" if metric == "id_cliente" else "conteo_transacciones"
