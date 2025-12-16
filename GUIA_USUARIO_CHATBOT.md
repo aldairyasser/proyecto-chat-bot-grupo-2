@@ -31,6 +31,7 @@ Este chatbot permite que cualquier usuario realice preguntas sobre los datos de 
 - **Filtros**: por año, mes, trimestre, país, ciudad, producto, categoría, género, edad.
 - **Agrupaciones**: por año, mes, trimestre, país, etc.
 - **Rankings**: top productos, mayores ventas, etc.
+- **Gráficos**: de barras, de línea o de quesito sobre ventas, productos, etc. por meses, años, cantidades o frecuencias. Eso sí, debes indicar qué tipo de gráfico quieres específicamente.
 
 ---
 
@@ -38,6 +39,7 @@ Este chatbot permite que cualquier usuario realice preguntas sobre los datos de 
 - Usa frases claras y directas.
 - Puedes preguntar en español o inglés.
 - Si no entiendes una respuesta, prueba a reformular la pregunta.
+- No te olvides de indicar tu gráfico favorito: ¡de líneas, barras o incluso de quesito!
 
 ---
 
@@ -54,8 +56,6 @@ Este chatbot permite que cualquier usuario realice preguntas sobre los datos de 
 
 ---
 
----
-
 ## ¿Listo para empezar?
 
 ¡Ya puedes comenzar a explorar tus datos de e-commerce de forma sencilla y natural! No importa si nunca has usado una base de datos: este chatbot está diseñado para ayudarte a obtener la información que necesitas con solo escribir tu pregunta.
@@ -68,4 +68,4 @@ Recuerda:
 ¿Tienes alguna pregunta, sugerencia o necesitas soporte?
 - Contáctanos a través de GitHub o LinkedIn.
 
-¡Disfruta la experiencia y saca el máximo partido a tus datos!
+¡Saca el máximo partido a tus datos con Kairo!
