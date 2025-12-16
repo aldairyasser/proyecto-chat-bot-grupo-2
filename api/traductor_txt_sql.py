@@ -599,8 +599,19 @@ def detectar_filtros(doc, tokens, idioma):
 
 ## Generador de SQL
 def generar_sql(texto: str):
+
     doc, idioma = detectar_idioma(texto)
     tokens_norm = _normalize_tokens(doc)
+
+    # Verificar intención de negocio
+    tokens_norm = _normalize_tokens(doc)  # ya lo haces
+    business_keywords = {"ventas","totales","mes","año","producto","categoria","agrupado","país","pais","precio","trimestre","meses"}
+
+# Revisamos si al menos un token coincide con keywords de negocio
+    if not any(k in tokens_norm for k in business_keywords):
+        return None
+
+
         
     # Detectar GROUP BY, agregación y métricas
     where = detectar_filtros(doc, tokens_norm, idioma)
@@ -691,12 +702,10 @@ def generar_sql(texto: str):
         select_parts.append(f"COUNT(DISTINCT id_transaccion) AS {alias_metric}")
 
     else:
-        if not group_by:
-        # Sin intención: devuelve columnas principales (evita SELECT *)
-            select_parts.append("id_transaccion")
-            select_parts.append("fecha_compra")
-            select_parts.append("importe_total")
-            select_parts.append("cantidad")
+        if not group_by and not metric:
+        # Si no hay intención de negocio detectada, devolver None
+            return None
+
 
     sql = "SELECT " + ", ".join(select_parts) + f" FROM {TABLE_NAME}"
 
