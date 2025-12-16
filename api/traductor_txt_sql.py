@@ -8,7 +8,6 @@ import pandas as pd
 # ## Cargamos los modelos 
 # Modelos
 nlp_es = spacy.load("es_core_news_sm") # Español
-nlp_en = spacy.load("en_core_web_sm") # English
 
 #df = pd.merge(transacciones, clientes, on="id_cliente", how="outer")
 TABLE_NAME = "merge_transaccion_cliente"
