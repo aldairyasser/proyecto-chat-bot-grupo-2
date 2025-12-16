@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 from dotenv import load_dotenv
-from .traductor_txt_sql import generar_sql
+from api.traductor_txt_sql import generar_sql
 from flask_cors import CORS
 from MCP.mcp_core import MCP
 from MCP.mcp_tools import query_dataset, init_db
